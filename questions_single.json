@@ -1,0 +1,30 @@
+{
+  "title": "C++ Single Answer Quiz",
+  "questions": [
+    {
+      "question": "Which keyword is used to define a class in C++?",
+      "options": ["function", "class", "struct", "object"],
+      "answer": 2
+    },
+    {
+      "question": "What is the correct way to include the iostream library?",
+      "options": ["#include <iostream>", "#include iostream", "import iostream", "using iostream"],
+      "answer": 1
+    },
+    {
+      "question": "Which operator is used for output in C++?",
+      "options": [">>", "<<", "->", "::"],
+      "answer": 2
+    },
+    {
+      "question": "What does 'int' stand for in C++?",
+      "options": ["integer", "interface", "internal", "input"],
+      "answer": 1
+    },
+    {
+      "question": "Which of the following is a valid C++ comment?",
+      "options": ["// This is a comment", "/* This is a comment", "# This is a comment", "-- This is a comment"],
+      "answer": 1
+    }
+  ]
+}

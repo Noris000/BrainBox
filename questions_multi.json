@@ -1,0 +1,30 @@
+{
+  "title": "C++ Multiple Answer Quiz",
+  "questions": [
+    {
+      "question": "Which of the following are valid C++ data types? (Select all that apply)",
+      "options": ["int", "string", "float", "boolean"],
+      "answers": [1, 3]
+    },
+    {
+      "question": "Which of these are looping structures in C++? (Select all that apply)",
+      "options": ["for", "while", "loop", "do-while"],
+      "answers": [1, 2, 4]
+    },
+    {
+      "question": "Which keywords are used for access control in a class? (Select all that apply)",
+      "options": ["public", "private", "protected", "internal"],
+      "answers": [1, 2, 3]
+    },
+    {
+      "question": "Which of the following are correct ways to declare a pointer?",
+      "options": ["int* ptr;", "int *ptr;", "int ptr*;", "int* ptr = nullptr;"],
+      "answers": [1, 2, 4]
+    },
+    {
+      "question": "Which of these are related to object-oriented programming in C++?",
+      "options": ["class", "inheritance", "printf", "encapsulation"],
+      "answers": [1, 2, 4]
+    }
+  ]
+}
