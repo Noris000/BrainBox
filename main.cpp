@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     resultLayout->setContentsMargins(0, 0, 0, 0);
 
     // ========================================================
-    // Welcome screen (centered)
+    // Welcome screen
     // ========================================================
     QLabel *titleLabel = new QLabel("Welcome to BrainBox");
     QFont titleFont = titleLabel->font();
@@ -183,6 +183,7 @@ int main(int argc, char *argv[])
         quizQuestions.clear();
         maxPossibleScore = 0;
 
+        // JSON answer numbers and the labels shown to the user are both 1-based.
         for (const auto& q : data["questions"]) {
             Question question;
             question.text = q["question"].get<std::string>();
@@ -204,7 +205,7 @@ int main(int argc, char *argv[])
             quizQuestions.push_back(question);
         }
 
-        // Shuffle questions
+        // Randomize the order for each quiz attempt without changing answer indices.
         std::random_device rd;
         std::mt19937 g(rd());
         std::shuffle(quizQuestions.begin(), quizQuestions.end(), g);
@@ -245,7 +246,7 @@ int main(int argc, char *argv[])
         questionLabel->show();
         optionsContainer->show();
 
-        // Create buttons dynamically (any number of options)
+        // Build choices from the JSON so questions are not limited to a fixed option count.
         for (size_t i = 0; i < q.options.size(); ++i) {
             QPushButton *btn = new QPushButton(
                 QString("%1.  %2")
@@ -259,7 +260,7 @@ int main(int argc, char *argv[])
             optionsLayout->addWidget(btn);
             optionButtons.push_back(btn);
 
-            // Single answer mode – click = answer
+            // In single-answer mode, selecting one choice submits it immediately.
             if (!q.isMultiple) {
                 QObject::connect(btn, &QPushButton::clicked, [&, i]() {
                     for (QPushButton* b : optionButtons)
@@ -341,6 +342,7 @@ int main(int argc, char *argv[])
                 .arg(QString::fromStdString(q.options[answer - 1]));
         }
 
+        // Sets make membership checks simple and prevent duplicate answer indices.
         QSet<int> selected;
         for (size_t i = 0; i < optionButtons.size(); ++i) {
             if (optionButtons[i]->isChecked()) {
@@ -353,7 +355,7 @@ int main(int argc, char *argv[])
 
         checkButton->hide();
 
-        // Rule: too many selections → 0 points
+        // Selecting more choices than the question has correct answers earns no points.
         if (selected.size() > static_cast<size_t>(numCorrect)) {
             feedbackLabel->setText(
                 QString("Too many answers selected (max %1). 0 points.\nCorrect answers: %2")
@@ -371,6 +373,7 @@ int main(int argc, char *argv[])
             correctSet.insert(a);
 
         int pointsThisQuestion = 0;
+        // Award one point for each selected correct choice; incorrect choices do not subtract points.
         for (int chosen : selected) {
             if (correctSet.contains(chosen)) {
                 pointsThisQuestion++;
@@ -421,6 +424,7 @@ int main(int argc, char *argv[])
 
             double percentage = 0.0;
             if (maxPossibleScore > 0) {
+                // Multiple-answer questions can be worth several points, so use total correct choices.
                 percentage = (static_cast<double>(score) / maxPossibleScore) * 100.0;
             }
 
