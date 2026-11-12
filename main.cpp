@@ -170,7 +170,11 @@ int main(int argc, char *argv[])
             file >> data;
         } catch (const json::parse_error& e) {
             QMessageBox::critical(nullptr, "Error",
-                QString("JSON error:\n%1").arg(e.what()));
+                QString("Invalid JSON syntax:\n%1\n\n"
+                        "Every property must have a valid value. "
+                        "For example, write a question as:\n"
+                        "\"question\": \"Which keyword is used to define a class in C++?\"")
+                    .arg(e.what()));
             return false;
         }
         file.close();
@@ -180,11 +184,67 @@ int main(int argc, char *argv[])
             return false;
         }
 
+        if (data["questions"].empty()) {
+            QMessageBox::critical(nullptr, "Error", "No questions found in the file.");
+            return false;
+        }
+
         quizQuestions.clear();
         maxPossibleScore = 0;
 
         // JSON answer numbers and the labels shown to the user are both 1-based.
+        int questionNumber = 0;
         for (const auto& q : data["questions"]) {
+            ++questionNumber;
+            auto invalidQuestion = [&](const QString& reason) {
+                QMessageBox::critical(nullptr, "Error",
+                    QString("Invalid question %1 in %2:\n%3")
+                        .arg(questionNumber)
+                        .arg(QString::fromStdString(filename))
+                        .arg(reason));
+            };
+
+            if (!q.is_object()) {
+                invalidQuestion("Each question must be a JSON object.");
+                return false;
+            }
+            if (!q.contains("question") || !q["question"].is_string()) {
+                invalidQuestion("'question' must be a string.");
+                return false;
+            }
+            if (!q.contains("options") || !q["options"].is_array() ||
+                q["options"].empty()) {
+                invalidQuestion("'options' must be a non-empty array of strings.");
+                return false;
+            }
+            for (const auto& option : q["options"]) {
+                if (!option.is_string()) {
+                    invalidQuestion("Every item in 'options' must be a string.");
+                    return false;
+                }
+            }
+
+            if (multiple) {
+                if (!q.contains("answers") || !q["answers"].is_array() ||
+                    q["answers"].empty()) {
+                    invalidQuestion("'answers' must be a non-empty array of option numbers.");
+                    return false;
+                }
+                for (const auto& answer : q["answers"]) {
+                    if (!answer.is_number_integer() || answer < 1 ||
+                        answer > q["options"].size()) {
+                        invalidQuestion("Every item in 'answers' must be a valid 1-based option number.");
+                        return false;
+                    }
+                }
+            } else {
+                if (!q.contains("answer") || !q["answer"].is_number_integer() ||
+                    q["answer"] < 1 || q["answer"] > q["options"].size()) {
+                    invalidQuestion("'answer' must be a valid 1-based option number.");
+                    return false;
+                }
+            }
+
             Question question;
             question.text = q["question"].get<std::string>();
             question.isMultiple = multiple;
